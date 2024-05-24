@@ -10,10 +10,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from ..schemas.users import User, Token
 from ..dependencies import get_db
 from ..crud import crud
-
-SECRET_KEY = "fda947bd4b857683646d65967c5365f0ddd52d29dd827f85acc7e782c8f6e2e4"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+from ..config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,7 +26,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update(exp=expire)
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -61,7 +58,7 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id},
         expires_delta=access_token_expires

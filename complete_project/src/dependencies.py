@@ -10,10 +10,7 @@ from jwt.exceptions import InvalidTokenError
 from .crud import crud
 from .schemas.users import User, TokenData
 from .database.database import SessionLocal
-
-SECRET_KEY = "fda947bd4b857683646d65967c5365f0ddd52d29dd827f85acc7e782c8f6e2e4"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -34,7 +31,7 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
             raise creadentials_exception
